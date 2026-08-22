@@ -1,6 +1,6 @@
 # Dayflow HRMS - Human Resource Management System
 
-Dayflow is a modern, responsive, dark-themed **Human Resource Management System (HRMS)** built with React, TypeScript, Vite, and Tailwind CSS. It is designed based on official HRMS wireframes and features role-based access control, employee directory management, real-time attendance punch clocking, leave request approval workflows, and percentage-based payroll calculations.
+Dayflow is a modern, responsive, dark-themed **Human Resource Management System (HRMS)** built with React, TypeScript, Vite, and Tailwind CSS. It is designed based on official HRMS wireframes and follows best practices for accessibility and responsive design.
 
 ---
 
@@ -68,33 +68,6 @@ Dayflow is a modern, responsive, dark-themed **Human Resource Management System 
    [http://localhost:5173](http://localhost:5173)
 
 ---
-## 🔄 Core Workflow
-
-```text
-                    ┌─────────────────┐
-                    │      Login      │
-                    └────────┬────────┘
-                             │
-                   ┌─────────▼─────────┐
-                   │  Role Validation  │
-                   └─────────┬─────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-       ┌──────▼───────┐              ┌──────▼───────┐
-       │   Employee   │              │  Admin / HR  │
-       └──────┬───────┘              └──────┬───────┘
-              │                             │
-       ┌──────▼────────┐             ┌──────▼────────┐
-       │   Dashboard   │             │   Dashboard   │
-       └──────┬────────┘             └──────┬────────┘
-              │                             │
-       ┌──────┼──────────┐          ┌───────┼─────────┐
-       │      │          │          │       │         │
-    Profile Attendance Leave     Employees Attendance Payroll
-                      │              │       │
-                      └──────► Approval ◄────┘
-```
 
 ## 🔑 Pre-Populated Test Demo Credentials
 
