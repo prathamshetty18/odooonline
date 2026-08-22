@@ -68,6 +68,33 @@ Dayflow is a modern, responsive, dark-themed **Human Resource Management System 
    [http://localhost:5173](http://localhost:5173)
 
 ---
+## 🔄 Core Workflow
+
+```text
+                    ┌─────────────────┐
+                    │      Login      │
+                    └────────┬────────┘
+                             │
+                   ┌─────────▼─────────┐
+                   │  Role Validation  │
+                   └─────────┬─────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+       ┌──────▼───────┐              ┌──────▼───────┐
+       │   Employee   │              │  Admin / HR  │
+       └──────┬───────┘              └──────┬───────┘
+              │                             │
+       ┌──────▼────────┐             ┌──────▼────────┐
+       │   Dashboard   │             │   Dashboard   │
+       └──────┬────────┘             └──────┬────────┘
+              │                             │
+       ┌──────┼──────────┐          ┌───────┼─────────┐
+       │      │          │          │       │         │
+    Profile Attendance Leave     Employees Attendance Payroll
+                      │              │       │
+                      └──────► Approval ◄────┘
+```
 
 ## 🔑 Pre-Populated Test Demo Credentials
 
