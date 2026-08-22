@@ -1,283 +1,258 @@
-# Dayflow — Human Resource Management System
+# Dayflow — Human Resource Management System (HRMS)
 
-> **Every workday, perfectly aligned.**
+> **“Every workday, perfectly aligned.”**
 
-Dayflow is a **Human Resource Management System (HRMS)** designed to digitize and streamline essential HR operations. It provides employees and HR/Admin officers with a centralized platform for managing profiles, attendance, leave requests, payroll information, and approval workflows.
+Dayflow is a modern, full-stack Human Resource Management System built for growing organizations. It streamlines workforce operations with role-based access control, live attendance punch-in/out, leave requests & approval workflows, itemized payroll calculations, realtime in-app notifications, and executive HR analytics.
 
-## 🚀 Features
+---
 
-### 🔐 Authentication & Authorization
+## Table of Contents
 
-* Secure Sign Up and Sign In
-* Employee ID, email, password, and role-based registration
-* Email verification
-* Role-based access control
-* Separate Employee and Admin/HR experiences
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Application Structure](#application-structure)
+- [Demo Credentials](#demo-credentials)
+- [Installation & Setup](#installation--setup)
+- [Database Configuration (MySQL)](#database-configuration-mysql)
+- [Running the Application](#running-the-application)
+- [API Overview](#api-overview)
+- [Future Enhancements](#future-enhancements)
 
-### 👨‍💼 Employee Management
+---
 
-Employees can:
+## Features
 
-* View personal information
-* View job details
-* View salary structure
-* Access documents
-* Manage profile picture
-* Update limited profile information such as phone number and address
+### 1. Role-Based Access Control (RBAC)
+- **HR Administrator**: Full organization overview, workforce management (CRUD), attendance override, leave review & decisions with comments, payroll adjustment with live formula calculation.
+- **Employee**: Personal punch dashboard, working hours tracker, leave quota balance & history, read-only compensation breakdown, profile management.
 
-Admins/HR can:
+### 2. Live Attendance Management
+- Real-time **Check In** and **Check Out** with validation safeguards.
+- Automated working hours calculation.
+- Attendance status classification: `Present`, `Absent`, `Half Day`, `Leave`.
+- Admin filtering by employee, date range, and status with manual adjustments.
 
-* View employee information
-* Switch between employees
-* Edit employee details
+### 3. Leave Management & Approval Engine
+- Allocation counters for **Paid Leave**, **Sick Leave**, and **Unpaid Leave**.
+- Leave application modal with reason, date range selection, and quota validation.
+- Interactive admin approval queue with comments and automatic employee notifications.
 
-### 📊 Attendance Management
+### 4. Payroll & Compensation Hub
+- Transparent salary formulation:
+  $$\text{Net Salary} = \text{Basic Salary} + \text{Allowances} - \text{Deductions}$$
+- Itemized salary components with payment status tracking.
+- Strict data privacy preventing cross-employee payroll exposure.
 
-* Daily attendance tracking
-* Weekly attendance view
-* Employee check-in/check-out
-* Attendance status:
+### 5. Executive HR Analytics & Dashboard
+- Workforce distribution across company departments.
+- Weekly attendance presence trends.
+- Quick action queues for pending approvals.
 
-  * Present
-  * Absent
-  * Half-day
-  * Leave
-* Employees can view their own attendance
-* Admin/HR can view attendance records of all employees
+---
 
-### 📝 Leave & Time-Off Management
+## Technology Stack
 
-Employees can:
+### Frontend
+- **Framework**: React 18 with Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS & Lucide React icons
+- **Routing**: React Router v6
+- **HTTP Client**: Axios with JWT interceptors
+- **Data Visualization**: Recharts
 
-* Apply for leave
-* Select leave type:
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Language**: TypeScript (with `tsx`)
+- **Authentication**: JWT (JSON Web Tokens) & `bcryptjs`
+- **Validation**: Zod schema validation
+- **Database Driver**: `mysql2` with automatic database initialization and built-in fallback resilience.
 
-  * Paid
-  * Sick
-  * Unpaid
-* Select date ranges
-* Add remarks
-* Track request status
+### Database
+- **Primary Engine**: MySQL 8.0+
+- Relational schema with primary keys, foreign key constraints, indexes, and cascades.
 
-Leave statuses:
+---
 
-* 🟡 Pending
-* 🟢 Approved
-* 🔴 Rejected
-
-Admins/HR can:
-
-* View all leave requests
-* Approve or reject requests
-* Add comments
-* Update employee records automatically after decisions
-
-### 💰 Payroll & Salary Management
-
-Employees have read-only access to their payroll information.
-
-Admins can:
-
-* View payroll information of all employees
-* Update salary structures
-* Maintain payroll accuracy
-
-### 📈 Dashboard
-
-#### Employee Dashboard
-
-Provides quick access to:
-
-* Profile
-* Attendance
-* Leave Requests
-* Logout
-* Recent activities and alerts
-
-#### Admin/HR Dashboard
-
-Provides:
-
-* Employee list
-* Attendance records
-* Leave approvals
-* Employee switching
-* Payroll information
-
-## 🏗️ System Roles
-
-| Role                   | Capabilities                                              |
-| ---------------------- | --------------------------------------------------------- |
-| **Employee**           | Profile, attendance, leave requests, salary details       |
-| **Admin / HR Officer** | Employee management, attendance, leave approvals, payroll |
-
-## 🔄 Core Workflow
-
-```text
-                    ┌─────────────────┐
-                    │      Login      │
-                    └────────┬────────┘
-                             │
-                   ┌─────────▼─────────┐
-                   │  Role Validation  │
-                   └─────────┬─────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-       ┌──────▼───────┐              ┌──────▼───────┐
-       │   Employee   │              │  Admin / HR  │
-       └──────┬───────┘              └──────┬───────┘
-              │                             │
-       ┌──────▼────────┐             ┌──────▼────────┐
-       │   Dashboard   │             │   Dashboard   │
-       └──────┬────────┘             └──────┬────────┘
-              │                             │
-       ┌──────┼──────────┐          ┌───────┼─────────┐
-       │      │          │          │       │         │
-    Profile Attendance Leave     Employees Attendance Payroll
-                      │              │       │
-                      └──────► Approval ◄────┘
-```
-
-## 📌 Functional Modules
-
-```text
-Dayflow HRMS
-│
-├── Authentication
-│   ├── Sign Up
-│   ├── Sign In
-│   └── Email Verification
-│
-├── Employee Management
-│   ├── Profile
-│   ├── Job Details
-│   ├── Documents
-│   └── Salary Structure
-│
-├── Attendance
-│   ├── Check-in / Check-out
-│   ├── Daily View
-│   ├── Weekly View
-│   └── Attendance Status
-│
-├── Leave Management
-│   ├── Apply Leave
-│   ├── Leave Types
-│   ├── Approval
-│   └── Request Status
-│
-└── Payroll
-    ├── Employee Payroll View
-    ├── Salary Structure
-    └── Admin Payroll Control
-```
-
-## 🛡️ Access Control
-
-Dayflow follows a **role-based access model**:
-
-### Employee
-
-Employees have access to their own:
-
-* Profile
-* Attendance
-* Leave requests
-* Salary information
-
-### Admin / HR Officer
-
-Admins/HR have management privileges over:
-
-* Employees
-* Attendance
-* Leave approvals
-* Payroll
-* Salary structures
-
-## 🔮 Future Enhancements
-
-The project specification identifies the following future improvements:
-
-* 📧 Email and notification alerts
-* 📊 Analytics and reporting dashboard
-* 📄 Salary slip reports
-* 📈 Attendance reports
-
-## 🎯 Project Objective
-
-The main objective of Dayflow is to replace fragmented HR processes with a **centralized digital HR management platform**, making everyday HR operations easier for both employees and HR/Admin teams.
-
-## 🗂️ Project Structure
-
-A suggested repository structure:
+## Application Structure
 
 ```text
 dayflow/
 │
 ├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── services/
-│   └── assets/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/         # Button, Input, Modal, Badge, StatCard, EmptyState, LoadingSpinner
+│   │   │   └── layout/         # Header, Sidebar, ProtectedRoute
+│   │   ├── pages/
+│   │   │   ├── auth/           # Login, Register, ForgotPassword
+│   │   │   ├── employee/       # EmployeeDashboard, MyProfile, MyAttendance, MyLeaves, MyPayroll
+│   │   │   ├── admin/          # AdminDashboard, EmployeeList, EmployeeDetails, AdminAttendance, LeaveApprovals, AdminPayroll
+│   │   │   └── common/         # NotificationsPage, SettingsPage, NotFoundPage
+│   │   ├── layouts/            # DashboardLayout
+│   │   ├── services/           # api, authService, employeeService, attendanceService, leaveService, payrollService, notificationService, statsService
+│   │   ├── context/            # AuthContext, ToastContext
+│   │   ├── hooks/              # useAuth, useToast
+│   │   ├── types/              # index.ts (Full TypeScript data definitions)
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   └── package.json
 │
 ├── backend/
-│   ├── routes/
-│   ├── controllers/
-│   ├── models/
-│   ├── services/
-│   └── middleware/
+│   ├── src/
+│   │   ├── config/             # db.ts (MySQL pool & fallback), env.ts
+│   │   ├── controllers/        # auth, employee, attendance, leave, payroll, notification, stats
+│   │   ├── middleware/         # authMiddleware, roleMiddleware, errorHandler
+│   │   ├── models/             # userModel, employeeModel, attendanceModel, leaveModel, payrollModel, notificationModel
+│   │   ├── routes/             # authRoutes, employeeRoutes, attendanceRoutes, leaveRoutes, payrollRoutes, notificationRoutes, statsRoutes
+│   │   ├── utils/              # jwt, password, response, seedData
+│   │   └── server.ts           # Express server entry point
+│   ├── tsconfig.json
+│   └── package.json
 │
 ├── database/
-│   └── schema/
+│   ├── schema.sql              # MySQL DDL relational table schema
+│   └── seed.sql                # Initial development seed data
 │
-├── docs/
-│   └── requirements/
-│
-├── README.md
-└── LICENSE
+├── .env.example
+└── README.md
 ```
-
-> **Note:** The uploaded project specification defines the HRMS requirements and functionality, but does not specify a finalized programming language, framework, database, or exact repository structure. The structure above is therefore a suggested organization rather than a source-defined implementation.
-
-## 📐 Requirements Reference
-
-The system requirements cover:
-
-* Authentication & authorization
-* Role-based access
-* Employee profiles
-* Attendance tracking
-* Leave management
-* Approval workflows
-* Payroll visibility and control
-* Notifications
-* Analytics and reports
-
-The complete functional requirements are defined in the project specification.
-
-## 👥 User Types
-
-| User                         | Description                                                               |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| 👨‍💼 **Admin / HR Officer** | Manages employees, attendance, leave approvals, and payroll               |
-| 👤 **Employee**              | Manages personal information, attendance, leave, and views salary details |
-
-## 📚 Project Documentation
-
-The project includes an Excalidraw architecture/design reference:
-
-**Excalidraw:** https://link.excalidraw.com/l/65VNwvy7c4X/58RLEJ4oOwh
-
-## 📄 License
-
-This project is intended for educational/project development purposes. Add an appropriate open-source license if the repository is intended for public distribution.
 
 ---
 
-### ⭐ Dayflow
+## Demo Credentials
 
-**Every workday, perfectly aligned.**
+You can log in with these pre-seeded development accounts or click the **One-Click Demo Credentials** buttons on the login screen:
 
-A centralized HRMS for simplifying **people, attendance, leave, and payroll management**.
+### 1. Admin / HR Officer Account
+- **Email**: `admin@dayflow.com`
+- **Password**: `Admin@123`
+- **Role**: `ADMIN`
+
+### 2. Employee Account
+- **Email**: `employee@dayflow.com`
+- **Password**: `Employee@123`
+- **Role**: `EMPLOYEE`
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+- Node.js (v18.0.0 or later)
+- npm / yarn / pnpm
+- MySQL Server (optional for native MySQL storage; embedded mode works out of the box)
+
+### 1. Configure Environment Variables
+Copy `.env.example` to `.env` in the root:
+```bash
+cp .env.example .env
+```
+
+Default contents:
+```env
+PORT=5000
+NODE_ENV=development
+
+# MySQL Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=dayflow_db
+
+# Security & JWT
+JWT_SECRET=dayflow_super_secure_jwt_secret_key_2026_aligned
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+```
+
+---
+
+## Database Configuration (MySQL)
+
+If you have a local MySQL server running:
+1. Log into your MySQL client:
+   ```bash
+   mysql -u root -p
+   ```
+2. Execute the schema and seed scripts:
+   ```sql
+   source database/schema.sql;
+   source database/seed.sql;
+   ```
+*Note: If MySQL is not running on port 3306, the backend automatically initializes with embedded relational data so you can test all features immediately without any manual configuration.*
+
+---
+
+## Running the Application
+
+### 1. Start the Backend Server
+```bash
+cd backend
+npm install
+npm run dev
+```
+The backend REST API will start at `http://localhost:5000`.
+
+### 2. Start the Frontend Application
+Open a new terminal:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend application will start at `http://localhost:5173`.
+
+---
+
+## API Overview
+
+### Authentication
+- `POST /api/auth/register` — Register a new employee or admin account.
+- `POST /api/auth/login` — Authenticate and receive a JWT.
+- `POST /api/auth/logout` — End user session.
+- `GET /api/auth/me` — Retrieve active user session and profile.
+
+### Employees
+- `GET /api/employees` — List all workforce employees (Admin/Directory).
+- `GET /api/employees/:id` — Retrieve full employee profile with compensation.
+- `POST /api/employees` — Onboard a new employee (Admin).
+- `PUT /api/employees/:id` — Update employee details (Role-guarded).
+- `DELETE /api/employees/:id` — Deactivate employee profile (Admin).
+
+### Attendance
+- `POST /api/attendance/check-in` — Clock in for the current workday.
+- `POST /api/attendance/check-out` — Clock out and compute working hours.
+- `GET /api/attendance/my` — Retrieve employee's personal attendance history.
+- `GET /api/attendance` — View all company attendance logs (Admin).
+- `PUT /api/attendance/:id` — Manually adjust punches/status (Admin).
+
+### Leaves
+- `POST /api/leaves` — Submit a new leave application.
+- `GET /api/leaves/my` — View leave requests and quota balances.
+- `GET /api/leaves` — Retrieve all company leave requests (Admin).
+- `PUT /api/leaves/:id/approve` — Approve leave with optional notes (Admin).
+- `PUT /api/leaves/:id/reject` — Reject leave with comments (Admin).
+
+### Payroll
+- `GET /api/payroll/my` — Securely view own compensation breakdown.
+- `GET /api/payroll` — View company payroll register (Admin).
+- `PUT /api/payroll/:id` — Update basic salary, allowances, deductions (Admin).
+
+### Notifications
+- `GET /api/notifications` — Retrieve user alerts.
+- `PUT /api/notifications/:id/read` — Mark notification as read.
+- `PUT /api/notifications/read-all` — Mark all notifications as read.
+
+---
+
+## Future Enhancements
+- Automated Email & SMS Notifications via SendGrid/Twilio.
+- PDF Salary Slip Generation and Download.
+- Biometric & Facial Recognition Device Integration.
+- Performance Review Cycles and 360-Degree Feedback.
+- AI-Powered Workforce Analytics & Attrition Prediction.
