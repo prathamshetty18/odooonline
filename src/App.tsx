@@ -34,6 +34,21 @@ export function App() {
     refreshData();
   }, []);
 
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    if (user.role === 'admin') {
+      setActiveTab('dashboard');
+      setSelectedEmployee(null);
+    } else {
+      // Normal employee: land on Profile, do not show Dashboard or Employee Directory
+      const myEmp = db.getEmployeeById(user.employeeId);
+      if (myEmp) {
+        setSelectedEmployee(myEmp);
+      }
+      setActiveTab('profile');
+    }
+  };
+
   const handleSelectEmployee = (emp: EmployeeProfile) => {
     setSelectedEmployee(emp);
     setActiveTab('profile');
@@ -58,21 +73,29 @@ export function App() {
         currentUser={currentUser}
         activeTab={activeTab}
         setActiveTab={(tab) => {
-          setSelectedEmployee(null);
-          setActiveTab(tab);
+          if (!isAdmin && (tab === 'dashboard' || tab === 'employees')) {
+            handleSelectMyProfile();
+          } else {
+            if (tab !== 'profile') setSelectedEmployee(null);
+            setActiveTab(tab);
+          }
         }}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={() => {
+          setCurrentUser(null);
+          setSelectedEmployee(null);
+          setActiveTab('dashboard');
+        }}
         onSelectMyProfile={handleSelectMyProfile}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!currentUser ? (
-          <LoginModal onLoginSuccess={(u) => setCurrentUser(u)} />
+          <LoginModal onLoginSuccess={handleLoginSuccess} />
         ) : (
           <>
-            {/* Dashboard */}
-            {activeTab === 'dashboard' && (
+            {/* Dashboard (Admin Only) */}
+            {activeTab === 'dashboard' && isAdmin && (
               <AdminDashboard
                 employees={employees}
                 leaveRequests={leaveRequests}
@@ -86,8 +109,8 @@ export function App() {
               />
             )}
 
-            {/* Employees Directory */}
-            {activeTab === 'employees' && (
+            {/* Employees Directory (Admin Only) */}
+            {activeTab === 'employees' && isAdmin && (
               <EmployeeDirectory
                 employees={employees}
                 onSelectEmployee={handleSelectEmployee}
@@ -96,12 +119,12 @@ export function App() {
               />
             )}
 
-            {/* Profile View */}
-            {activeTab === 'profile' && selectedEmployee && (
+            {/* Profile View (Accessible by Admin for any employee, or by Employee for self) */}
+            {activeTab === 'profile' && (selectedEmployee || (currentUser && db.getEmployeeById(currentUser.employeeId))) && (
               <EmployeeProfileView
-                employee={selectedEmployee}
+                employee={selectedEmployee || db.getEmployeeById(currentUser.employeeId)!}
                 currentUser={currentUser}
-                onBack={() => setActiveTab('employees')}
+                onBack={() => setActiveTab(isAdmin ? 'employees' : 'profile')}
                 onProfileUpdated={(updated) => {
                   setSelectedEmployee(updated);
                   refreshData();

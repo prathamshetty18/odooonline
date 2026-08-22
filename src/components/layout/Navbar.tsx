@@ -29,13 +29,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'employees', label: 'Employees', icon: Users },
-    { id: 'attendance', label: 'Attendance', icon: Clock },
-    { id: 'timeoff', label: 'Time Off', icon: Calendar },
-    { id: 'salary', label: 'Salary', icon: DollarSign },
-  ];
+  const isAdmin = currentUser?.role === 'admin';
+
+  // Navigation items: Admin sees all tabs; Normal Employee does NOT see Dashboard or Employees roster.
+  const navItems = isAdmin
+    ? [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'employees', label: 'Employees', icon: Users },
+        { id: 'attendance', label: 'Attendance', icon: Clock },
+        { id: 'timeoff', label: 'Time Off', icon: Calendar },
+        { id: 'salary', label: 'Salary', icon: DollarSign },
+      ]
+    : [
+        { id: 'profile', label: 'My Profile', icon: UserIcon },
+        { id: 'attendance', label: 'My Attendance', icon: Clock },
+        { id: 'timeoff', label: 'My Leave', icon: Calendar },
+        { id: 'salary', label: 'My Salary', icon: DollarSign },
+      ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#30363d] bg-[#161b22]">
@@ -43,7 +53,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo */}
         <div className="flex items-center gap-8">
           <div
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => {
+              if (isAdmin) {
+                setActiveTab('dashboard');
+              } else {
+                onSelectMyProfile();
+              }
+            }}
             className="flex cursor-pointer items-center gap-3 group"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-0.5 shadow-lg shadow-purple-900/30 group-hover:scale-105 transition-transform duration-200">
@@ -60,7 +76,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   HRMS
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 tracking-wider">ENTERPRISE WORKFORCE</p>
+              <p className="text-[10px] text-slate-400 tracking-wider">
+                {isAdmin ? 'ADMINISTRATOR PORTAL' : 'EMPLOYEE PORTAL'}
+              </p>
             </div>
           </div>
 
@@ -72,7 +90,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.id === 'profile') {
+                      onSelectMyProfile();
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                  }}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30 shadow-sm'
@@ -125,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </span>
                       <span
                         className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                          currentUser.role === 'admin'
+                          isAdmin
                             ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                             : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                         }`}
@@ -164,7 +188,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                       className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-purple-600/20 flex items-center gap-2.5 transition-colors"
                     >
                       <Calendar className="h-4 w-4 text-indigo-400" />
-                      Apply Leave
+                      My Leave
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        setActiveTab('salary');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-purple-600/20 flex items-center gap-2.5 transition-colors"
+                    >
+                      <DollarSign className="h-4 w-4 text-emerald-400" />
+                      My Salary
                     </button>
                   </div>
 
@@ -195,7 +229,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.id === 'profile') {
+                  onSelectMyProfile();
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
               className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${
                 isActive ? 'bg-purple-600 text-white' : 'text-slate-400 bg-[#161b22]'
               }`}
