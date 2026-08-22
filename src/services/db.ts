@@ -8,6 +8,7 @@ import type {
   WageType,
   Role,
 } from '../types';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 const USERS_KEY = 'dayflow_v3_users';
 const EMPLOYEES_KEY = 'dayflow_v3_employees';
@@ -133,7 +134,7 @@ export function calculateSalaryDetails(
   };
 }
 
-// Initial Indian Seed Users & Employees
+// Initial Seed Users & Employees
 const INITIAL_USERS: (User & { passwordHash: string })[] = [
   {
     id: 'usr_admin',
@@ -571,8 +572,8 @@ class DBService {
     name: string;
     email: string;
     phone: string;
-    post: string; // e.g., 'HR Manager', 'Manager', 'Employee', 'Software Engineer', etc.
-    role: Role;   // 'admin' or 'employee'
+    post: string;
+    role: Role;
     passwordHash: string;
   }): User {
     const users = this.getUsers();
@@ -635,6 +636,40 @@ class DBService {
 
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
     localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+
+    // Async sync to Supabase if configured
+    if (isSupabaseConfigured() && supabase) {
+      supabase.from('users').insert({
+        id: newUser.id,
+        email: newUser.email,
+        login_id: newUser.loginId,
+        password_hash: newUser.passwordHash,
+        role: newUser.role,
+        employee_id: newUser.employeeId,
+        name: newUser.name,
+        avatar_url: newUser.avatarUrl,
+        company_name: newUser.companyName,
+      }).then();
+
+      supabase.from('employees').insert({
+        id: newEmployee.id,
+        employee_id: newEmployee.employeeId,
+        login_id: newEmployee.loginId,
+        name: newEmployee.name,
+        job_position: newEmployee.jobPosition,
+        email: newEmployee.email,
+        mobile: newEmployee.mobile,
+        company: newEmployee.company,
+        department: newEmployee.department,
+        manager: newEmployee.manager,
+        location: newEmployee.location,
+        avatar_url: newEmployee.avatarUrl,
+        status: newEmployee.status,
+        resume: newEmployee.resume,
+        private_info: newEmployee.privateInfo,
+        salary_info: newEmployee.salaryInfo,
+      }).then();
+    }
 
     const { passwordHash: _, ...userWithoutPass } = newUser;
     return userWithoutPass;
