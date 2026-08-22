@@ -6,6 +6,7 @@ import type {
   User,
   LeaveBalance,
   WageType,
+  Role,
 } from '../types';
 
 const USERS_KEY = 'dayflow_v3_users';
@@ -15,18 +16,15 @@ const LEAVE_KEY = 'dayflow_v3_leave_requests';
 
 // Generate Login ID using the exact Wireframe Format:
 // [Company Prefix 2 letters] + [First 2 letters of First Name + Last Name] + [Year of Joining] + [Serial Number 4 digits]
-// Example: Dayflow India + Priya Sharma + 2026 + 0002 -> DFPRSH20260002
 export function generateWireframeLoginId(
   companyName: string,
   fullName: string,
   joiningYear: number = new Date().getFullYear(),
   serial: number = 1
 ): string {
-  // Company Prefix (e.g. Odoo India -> OI, Dayflow Technologies -> DF)
   const cleanComp = companyName.trim().replace(/[^a-zA-Z]/g, '');
   const compPrefix = cleanComp.length >= 2 ? cleanComp.substring(0, 2).toUpperCase() : 'DF';
 
-  // Name 4 letters (First 2 of First Name + First 2 of Last Name)
   const nameParts = fullName.trim().split(/\s+/);
   const firstName = nameParts[0] || 'User';
   const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : firstName;
@@ -144,7 +142,7 @@ const INITIAL_USERS: (User & { passwordHash: string })[] = [
     passwordHash: 'admin123',
     role: 'admin',
     employeeId: 'DFAAME20260001',
-    name: 'Aarav Mehta (HR Admin)',
+    name: 'Aarav Mehta',
     avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=250&auto=format&fit=crop&q=80',
     companyName: 'Dayflow India',
   },
@@ -211,7 +209,7 @@ const INITIAL_EMPLOYEES: EmployeeProfile[] = [
     employeeId: 'DFAAME20260001',
     loginId: 'DFAAME20260001',
     name: 'Aarav Mehta',
-    jobPosition: 'VP of Human Resources',
+    jobPosition: 'HR Manager',
     email: 'admin@dayflow.com',
     mobile: '+91 98200 12345',
     company: 'Dayflow India',
@@ -567,12 +565,14 @@ class DBService {
     return userObj;
   }
 
-  // Register a New Admin/Company Account (Sign Up)
-  registerCompanyAdmin(data: {
+  // Register a New User Account with Post / Designation & Role
+  registerCompanyAccount(data: {
     companyName: string;
     name: string;
     email: string;
     phone: string;
+    post: string; // e.g., 'HR Manager', 'Manager', 'Employee', 'Software Engineer', etc.
+    role: Role;   // 'admin' or 'employee'
     passwordHash: string;
   }): User {
     const users = this.getUsers();
@@ -588,9 +588,9 @@ class DBService {
       email: data.email,
       loginId: generatedLoginId,
       passwordHash: data.passwordHash,
-      role: 'admin',
+      role: data.role,
       employeeId: generatedLoginId,
-      name: `${data.name} (Admin)`,
+      name: data.role === 'admin' ? `${data.name} (${data.post})` : data.name,
       avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=250&auto=format&fit=crop&q=80',
       companyName: data.companyName,
     };
@@ -600,22 +600,22 @@ class DBService {
       employeeId: generatedLoginId,
       loginId: generatedLoginId,
       name: data.name,
-      jobPosition: 'Company Founder / HR Admin',
+      jobPosition: data.post,
       email: data.email,
       mobile: data.phone || '+91 98000 00000',
       company: data.companyName,
-      department: 'Human Resources',
-      manager: 'Executive Board',
+      department: data.role === 'admin' ? 'Human Resources' : 'General',
+      manager: data.role === 'admin' ? 'Executive Board' : 'HR Manager',
       location: 'India HQ',
       avatarUrl: newUser.avatarUrl,
       status: 'present',
       resume: {
-        about: `Company Administrator at ${data.companyName}.`,
-        skills: ['HR Leadership', 'Strategic Management', 'Payroll Operations'],
+        about: `${data.post} at ${data.companyName}.`,
+        skills: ['Communication', 'Teamwork', 'Task Management'],
         certifications: [],
       },
       privateInfo: {
-        dateOfBirth: '1990-01-01',
+        dateOfBirth: '1995-01-01',
         address: 'HQ Address, India',
         personalEmail: data.email,
         gender: 'Male',
@@ -624,10 +624,10 @@ class DBService {
         bankName: 'HDFC Bank',
         accountNumber: '•••••••• 9988',
         ifsc: 'HDFC0000100',
-        pan: 'ADMIN9900P',
+        pan: 'NEWACC9900P',
         uan: '100998877112',
       },
-      salaryInfo: calculateSalaryDetails(150000),
+      salaryInfo: calculateSalaryDetails(data.role === 'admin' ? 120000 : 75000),
     };
 
     users.unshift(newUser);

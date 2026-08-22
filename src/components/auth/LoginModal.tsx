@@ -13,8 +13,9 @@ import {
   User as UserIcon,
   Upload,
   CheckCircle2,
+  Briefcase,
 } from 'lucide-react';
-import type { User } from '../../types';
+import type { User, Role } from '../../types';
 import { db, generateWireframeLoginId } from '../../services/db';
 
 interface LoginModalProps {
@@ -31,12 +32,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Sign Up State (Company / Admin Creation as per Wireframe)
+  // Sign Up State (Company / Employee / Manager Creation as per Wireframe)
   const [signUpForm, setSignUpForm] = useState({
     companyName: '',
     name: '',
     email: '',
     phone: '',
+    post: 'HR Manager', // Default Post
+    role: 'admin' as Role, // Default Role
     password: '',
     confirmPassword: '',
     companyLogo: '',
@@ -49,6 +52,29 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
   const previewLoginId = signUpForm.companyName && signUpForm.name
     ? generateWireframeLoginId(signUpForm.companyName, signUpForm.name)
     : '';
+
+  // Available Post Options
+  const POST_OPTIONS = [
+    { label: 'HR / Admin', role: 'admin' as Role },
+    { label: 'HR Manager', role: 'admin' as Role },
+    { label: 'General Manager', role: 'admin' as Role },
+    { label: 'Software Engineer', role: 'employee' as Role },
+    { label: 'UI/UX Designer', role: 'employee' as Role },
+    { label: 'Financial Analyst', role: 'employee' as Role },
+    { label: 'Marketing Manager', role: 'employee' as Role },
+    { label: 'Employee / Staff', role: 'employee' as Role },
+  ];
+
+  // Handle Post Change
+  const handlePostChange = (selectedPost: string) => {
+    const matched = POST_OPTIONS.find((p) => p.label === selectedPost);
+    const assignedRole = matched ? matched.role : selectedPost.toLowerCase().includes('hr') || selectedPost.toLowerCase().includes('admin') ? 'admin' : 'employee';
+    setSignUpForm({
+      ...signUpForm,
+      post: selectedPost,
+      role: assignedRole,
+    });
+  };
 
   // Handle Sign In Submit
   const handleSignIn = (e: React.FormEvent) => {
@@ -86,18 +112,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
     setLoading(true);
 
     setTimeout(() => {
-      const newUser = db.registerCompanyAdmin({
+      const newUser = db.registerCompanyAccount({
         companyName: signUpForm.companyName,
         name: signUpForm.name,
         email: signUpForm.email,
         phone: signUpForm.phone,
+        post: signUpForm.post,
+        role: signUpForm.role,
         passwordHash: signUpForm.password,
       });
 
       setLoading(false);
       setSignUpSuccessMsg({ loginId: newUser.loginId, name: newUser.name });
 
-      // Automatically sign in the newly registered company admin after 1.5 seconds
+      // Automatically sign in the newly registered user after 1.5 seconds
       setTimeout(() => {
         onLoginSuccess(newUser);
       }, 1500);
@@ -147,7 +175,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
                 <CheckCircle2 className="h-4 w-4" /> Account Registered Successfully!
               </div>
               <p>Generated Login ID: <span className="font-mono font-bold text-white text-sm">{signUpSuccessMsg.loginId}</span></p>
-              <p className="text-[11px] text-slate-400">Redirecting to workforce dashboard...</p>
+              <p className="text-[11px] text-slate-400">Redirecting to your portal...</p>
             </div>
           )}
 
@@ -220,7 +248,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
               </div>
             </form>
           ) : (
-            /* MODE 2: SIGN UP PAGE (Matching Wireframe) */
+            /* MODE 2: SIGN UP PAGE (With Post / Designation Selector) */
             <form onSubmit={handleSignUp} className="space-y-3 text-xs">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1">
@@ -255,9 +283,42 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
                     required
                     value={signUpForm.name}
                     onChange={(e) => setSignUpForm({ ...signUpForm, name: e.target.value })}
-                    placeholder="Full Administrator Name"
+                    placeholder="Full Name"
                     className="w-full rounded-xl bg-[#0d1117] border border-[#30363d] py-2 pl-9 pr-3 text-xs text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
+                </div>
+              </div>
+
+              {/* Post / Designation Field */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Post / Role :-</label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+                    <select
+                      value={signUpForm.post}
+                      onChange={(e) => handlePostChange(e.target.value)}
+                      className="w-full rounded-xl bg-[#0d1117] border border-[#30363d] py-2 pl-9 pr-3 text-xs text-slate-100 focus:border-purple-500 focus:outline-none"
+                    >
+                      {POST_OPTIONS.map((opt) => (
+                        <option key={opt.label} value={opt.label} className="bg-[#161b22] text-white">
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Portal Access Level :-</label>
+                  <select
+                    value={signUpForm.role}
+                    onChange={(e) => setSignUpForm({ ...signUpForm, role: e.target.value as Role })}
+                    className="w-full rounded-xl bg-[#0d1117] border border-[#30363d] py-2 px-3 text-xs text-slate-100 focus:border-purple-500 focus:outline-none"
+                  >
+                    <option value="admin" className="bg-[#161b22] text-white">Admin / HR (Full Access)</option>
+                    <option value="employee" className="bg-[#161b22] text-white">Employee (Personal Portal)</option>
+                  </select>
                 </div>
               </div>
 
@@ -269,7 +330,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
                     required
                     value={signUpForm.email}
                     onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })}
-                    placeholder="admin@company.com"
+                    placeholder="user@company.com"
                     className="w-full rounded-xl bg-[#0d1117] border border-[#30363d] py-2 px-3 text-xs text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                   />
                 </div>
